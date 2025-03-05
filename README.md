@@ -30,6 +30,7 @@ Create a .env file in the root directory with:
 
 ```bash
 REACT_APP_API_BASE_URL=http://localhost:8000
+REACT_APP_SD_BASE_URL=http://localhost:8001
 ```
 
 ## API Integration
