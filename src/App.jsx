@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import GameInterface from './components/Game/GameInterface';
 import LandingPage from './components/LandingPage';
 
-const App: React.FC = () => {
+const App = () => {
     return (
         <Router>
             <Routes>
@@ -15,4 +15,4 @@ const App: React.FC = () => {
     );
 };
 
-export default App; 
+export default App;

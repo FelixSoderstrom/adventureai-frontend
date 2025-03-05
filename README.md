@@ -1,46 +1,51 @@
-# Getting Started with Create React App
+# Adventure AI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An interactive storytelling experience powered by artificial intelligence where your choices shape the narrative.
 
-## Available Scripts
+## Dependencies
 
-In the project directory, you can run:
+- React 18
+- Chakra UI for styling
+- Zustand for state management
+- React Router for navigation
+- Framer Motion for animations
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- Dynamic storytelling with AI-generated responses
+- Interactive choices that affect the story
+- Visual scene representation
+- Audio feedback
+- State management with scene history
+- Responsive design with Chakra UI
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Prerequisites
 
-### `npm test`
+- Node.js (v14 or higher)
+- npm (v6 or higher)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Environment Variables
 
-### `npm run build`
+Create a .env file in the root directory with:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+REACT_APP_API_BASE_URL=http://localhost:8000
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## API Integration
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The application expects a backend server running at the URL specified in .env with the following endpoints:
 
-### `npm run eject`
+- POST /start-game : Initialize a new game session
+- POST /player-action : Process player actions and return new game state
+- POST /roll-dice/{requiredRoll} : Handle dice roll events (future implementation)
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Installation
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+1. Clone the repository
+2. Navigate to the project directory
+3. Install dependencies:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+npm install
+```

@@ -1,17 +1,8 @@
 import React from 'react';
-import {
-    Box,
-    Spinner,
-    Text,
-    VStack,
-} from '@chakra-ui/react';
+import PropTypes from 'prop-types';
+import { Box, Spinner, Text, VStack } from '@chakra-ui/react';
 
-interface LoadingOverlayProps {
-    isOpen: boolean;
-    message?: string;
-}
-
-const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ isOpen, message }) => {
+const LoadingOverlay = ({ isOpen, message }) => {
     if (!isOpen) return null;
 
     return (
@@ -35,4 +26,9 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ isOpen, message }) => {
     );
 };
 
-export default LoadingOverlay; 
+LoadingOverlay.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    message: PropTypes.string
+};
+
+export default LoadingOverlay;

@@ -1,11 +1,8 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Box, Text } from '@chakra-ui/react';
 
-interface StoryDisplayProps {
-    story: string;
-}
-
-const StoryDisplay: React.FC<StoryDisplayProps> = ({ story }) => {
+const StoryDisplay = React.memo(({ story }) => {
     return (
         <Box
             bg="gray.700"
@@ -19,6 +16,11 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ story }) => {
             </Text>
         </Box>
     );
+});
+
+StoryDisplay.displayName = 'StoryDisplay';
+StoryDisplay.propTypes = {
+    story: PropTypes.string.isRequired
 };
 
-export default StoryDisplay; 
+export default StoryDisplay;
