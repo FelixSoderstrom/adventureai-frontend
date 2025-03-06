@@ -1,39 +1,52 @@
 import { create } from 'zustand';
 
 const useGameStore = create((set) => ({
-    gameSession: {
+    game_session: {
         protagonist_name: '',
         inventory: [],
+        current_story: '',
         scenes: []
     },
     
-    initializeGame: (protagonistName) => set({
-        gameSession: {
-            protagonist_name: protagonistName,
+    initializeGame: (initialScene) => set({
+        game_session: {
+            protagonist_name: 'Felix', // Hardcoded for now, could be made dynamic
             inventory: [],
-            scenes: []
+            current_story: initialScene.story,
+            scenes: [{
+                story: initialScene.story,
+                action: initialScene.action
+            }]
         }
     }),
     
     addScene: (newScene) => set((state) => ({
-        gameSession: {
-            ...state.gameSession,
-            scenes: [...state.gameSession.scenes, {
-                story: newScene.story,
-                action: newScene.action,
-                mood: newScene.mood,
-                starting_point: false,
-                image: newScene.image,
-                music: newScene.music,
-                tts: newScene.tts,
-                compressed_story: newScene.compressed_story
+        game_session: {
+            ...state.game_session,
+            current_story: newScene.story,
+            scenes: [...state.game_session.scenes, {
+                story: newScene.compressed_story
             }]
         }
     })),
     
+    addActionToLastScene: (action) => set((state) => {
+        const scenes = [...state.game_session.scenes];
+        const lastScene = scenes[scenes.length - 1];
+        if (lastScene) {
+            scenes[scenes.length - 1] = { ...lastScene, action };
+        }
+        return {
+            game_session: {
+                ...state.game_session,
+                scenes
+            }
+        };
+    }),
+    
     updateInventory: (inventory) => set((state) => ({
-        gameSession: {
-            ...state.gameSession,
+        game_session: {
+            ...state.game_session,
             inventory
         }
     }))

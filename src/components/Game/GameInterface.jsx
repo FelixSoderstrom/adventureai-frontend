@@ -10,24 +10,34 @@ import useGameStore from '../../stores/gameStore';
 
 const GameInterface = () => {
     const [isLoading, setIsLoading] = useState(false);
-    const { gameSession, initializeGame: initGame, addScene } = useGameStore();  // Rename to avoid shadowing
+    const [currentImage, setCurrentImage] = useState('');
+    const { game_session, initializeGame, addScene, addActionToLastScene } = useGameStore();
     const toast = useToast();
 
     useEffect(() => {
-        const startGame = async () => {  // Rename the function
+        const startGame = async () => {
             setIsLoading(true);
             try {
-                const initialState = await gameApi.startGame();
-                initGame('Player');  // Initialize the game state first
+                // Initialize with a default first scene
+                const initialScene = {
+                    story: "You are a cat named Felix, ready for adventure.",
+                    action: "Starting your journey"
+                };
+                
+                // Initialize the store
+                initializeGame(initialScene);
+
+                // Get the updated game_session after initialization
+                const updatedGameSession = useGameStore.getState().game_session;
+                
+                // Get the first response from the API
+                const response = await gameApi.startGame(updatedGameSession);
+                setCurrentImage(response.image);
+                
+                // Add the response as a new scene
                 addScene({
-                    story: initialState.story,
-                    action: '',
-                    mood: 'neutral',
-                    starting_point: true,
-                    image: initialState.image,
-                    music: initialState.music,
-                    tts: initialState.tts,
-                    compressed_story: initialState.compressed_story
+                    story: response.story,
+                    compressed_story: response.compressed_story
                 });
             } catch (error) {
                 toast({
@@ -42,22 +52,27 @@ const GameInterface = () => {
         };
 
         startGame();
-    }, [toast, addScene, initGame]);  // Add initGame to dependencies
+    }, []);
 
     const handleAction = useCallback(async (action) => {
-        if (gameSession.scenes.length === 0) return;
+        if (game_session.scenes.length === 0) return;
         
         setIsLoading(true);
         try {
-            const newState = await gameApi.submitAction(action, gameSession);
+            // First add the action to the last scene
+            addActionToLastScene(action);
+            
+            // Get the updated game_session after adding the action
+            const updatedGameSession = useGameStore.getState().game_session;
+            
+            // Then make the API call with the updated game_session
+            const response = await gameApi.submitAction(updatedGameSession);
+            setCurrentImage(response.image);
+            
+            // Add the new scene
             addScene({
-                story: newState.story,
-                action: action,
-                mood: 'neutral',
-                image: newState.image,
-                music: newState.music,
-                tts: newState.tts,
-                compressed_story: newState.compressed_story
+                story: response.story,
+                compressed_story: response.compressed_story
             });
         } catch (error) {
             toast({
@@ -69,42 +84,20 @@ const GameInterface = () => {
             });
         }
         setIsLoading(false);
-    }, [gameSession, addScene, toast]);
-    // Remove this floating JSX
-    {isLoading && (
-        <LoadingOverlay 
-            isOpen={isLoading} 
-            message="Processing your action..." 
-        />
-    )}
+    }, [game_session, addScene, addActionToLastScene, toast]);
+
     return (
         <Box bg="black" minH="100vh" p={4}>
-            <Grid
-                templateColumns="1fr 1fr"
-                gap={4}
-                maxW="1800px"
-                mx="auto"
-                h="100vh"
-            >
-                {/* Left Side - Story and Controls */}
+            <Grid templateColumns="1fr 1fr" gap={4} maxW="1800px" mx="auto" h="100vh">
                 <GridItem>
                     <Grid templateRows="1fr auto auto" h="100%" gap={4}>
-                        <StoryDisplay 
-                            story={gameSession.scenes[gameSession.scenes.length - 1]?.story || ''} 
-                        />
-                        <ActionInput 
-                            onSubmit={handleAction} 
-                            disabled={isLoading} 
-                        />
+                        <StoryDisplay story={game_session.current_story || ''} />
+                        <ActionInput onSubmit={handleAction} disabled={isLoading} />
                     </Grid>
                 </GridItem>
-                {/* Right Side - Image and Inventory */}
                 <GridItem>
                     <Grid templateRows="2fr 1fr" h="100%" gap={4}>
-                        <ImageDisplay 
-                            imageUrl={gameSession.scenes[gameSession.scenes.length - 1]?.image || ''} 
-                            isLoading={isLoading} 
-                        />
+                        <ImageDisplay imageUrl={currentImage} isLoading={isLoading} />
                         <Box bg="gray.700" p={4} borderRadius="md">
                             <Box color="white" fontSize="xl" textAlign="center">
                                 Inventory Coming Soon
@@ -113,12 +106,8 @@ const GameInterface = () => {
                     </Grid>
                 </GridItem>
             </Grid>
-            {/* Update this LoadingOverlay */}
             {isLoading && (
-                <LoadingOverlay 
-                    isOpen={isLoading} 
-                    message="Processing your action..." 
-                />
+                <LoadingOverlay isOpen={isLoading} message="Processing your action..." />
             )}
         </Box>
     );
