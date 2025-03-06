@@ -1,48 +1,56 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Box, Grid, GridItem, useToast } from '@chakra-ui/react';
 import StoryDisplay from './StoryDisplay.jsx';
 import ActionInput from './ActionInput.jsx';
 import ImageDisplay from './ImageDisplay.jsx';
 import LoadingOverlay from './LoadingOverlay.jsx';
+import DiceRoller from './DiceRoller.jsx';
 import { gameApi } from '../../services/gameApi.js';
 import useGameStore from '../../stores/gameStore';
 
 const GameInterface = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [currentImage, setCurrentImage] = useState('');
-    const { game_session, initializeGame, addScene, addActionToLastScene } = useGameStore();
+    const [showDiceRoller, setShowDiceRoller] = useState(false);
+    const [diceRollData, setDiceRollData] = useState(null);
+    const { game_session, updateDiceRoll, addScene, addActionToLastScene } = useGameStore();
     const toast = useToast();
 
     useEffect(() => {
-        const startGame = async () => {
+        const initializeGameScene = async () => {
+            if (game_session.scenes.length === 0) return;
+            
             setIsLoading(true);
             try {
-                // Initialize with a default first scene
-                const initialScene = {
-                    story: "You are a cat named Felix, ready for adventure.",
-                    action: "Starting your journey"
-                };
+                // First, get the dice roll
+                const diceResponse = await gameApi.rollDice(game_session.scenes);
                 
-                // Initialize the store
-                initializeGame(initialScene);
+                // Save the dice roll data and show the roller
+                setDiceRollData(diceResponse);
+                setShowDiceRoller(true);
+                
+                // Update the dice roll result in the store
+                updateDiceRoll(diceResponse.dice_success);
 
-                // Get the updated game_session after initialization
-                const updatedGameSession = useGameStore.getState().game_session;
+                // Now get the new scene
+                const sceneResponse = await gameApi.generateNewScene(game_session);
                 
-                // Get the first response from the API
-                const response = await gameApi.startGame(updatedGameSession);
-                setCurrentImage(response.image);
+                // Update the image
+                setCurrentImage(sceneResponse.image);
                 
-                // Add the response as a new scene
+                // Add the new scene to the store
                 addScene({
-                    story: response.story,
-                    compressed_story: response.compressed_story
+                    story: sceneResponse.story,
+                    compressed_story: sceneResponse.compressed_story,
+                    music: sceneResponse.music
                 });
+                
             } catch (error) {
+                console.error('Error:', error);
                 toast({
                     title: 'Error',
-                    description: 'Failed to start the game. Please try again.',
+                    description: 'Failed to process the scene. Please try again.',
                     status: 'error',
                     duration: 5000,
                     isClosable: true,
@@ -51,30 +59,36 @@ const GameInterface = () => {
             setIsLoading(false);
         };
 
-        startGame();
-    }, []);
+        initializeGameScene();
+    }, []); // Empty dependency array - only run once when component mounts
 
     const handleAction = useCallback(async (action) => {
-        if (game_session.scenes.length === 0) return;
-        
         setIsLoading(true);
         try {
-            // First add the action to the last scene
+            // 1. Add the action to the most recent scene
             addActionToLastScene(action);
+
+            // 2. Make the roll_dice API call
+            const diceResponse = await gameApi.rollDice(game_session.scenes);
             
-            // Get the updated game_session after adding the action
-            const updatedGameSession = useGameStore.getState().game_session;
+            // 3. Update store with dice roll result and show roller
+            updateDiceRoll(diceResponse.dice_success);
+            setDiceRollData(diceResponse);
+            setShowDiceRoller(true);
+
+            // 4. Generate new scene
+            const sceneResponse = await gameApi.generateNewScene(game_session);
             
-            // Then make the API call with the updated game_session
-            const response = await gameApi.submitAction(updatedGameSession);
-            setCurrentImage(response.image);
-            
-            // Add the new scene
+            // 5. Update UI and store with new scene
+            setCurrentImage(sceneResponse.image);
             addScene({
-                story: response.story,
-                compressed_story: response.compressed_story
+                story: sceneResponse.story,
+                compressed_story: sceneResponse.compressed_story,
+                music: sceneResponse.music
             });
+
         } catch (error) {
+            console.error('Error processing action:', error);
             toast({
                 title: 'Error',
                 description: 'Failed to process your action. Please try again.',
@@ -84,7 +98,12 @@ const GameInterface = () => {
             });
         }
         setIsLoading(false);
-    }, [game_session, addScene, addActionToLastScene, toast]);
+    }, [game_session, addActionToLastScene, updateDiceRoll, addScene, toast]);
+
+    const handleDiceRollerClose = () => {
+        setShowDiceRoller(false);
+        setDiceRollData(null);
+    };
 
     return (
         <Box bg="black" minH="100vh" p={4}>
@@ -108,6 +127,14 @@ const GameInterface = () => {
             </Grid>
             {isLoading && (
                 <LoadingOverlay isOpen={isLoading} message="Processing your action..." />
+            )}
+            {diceRollData && (
+                <DiceRoller
+                    isOpen={showDiceRoller}
+                    onClose={handleDiceRollerClose}
+                    diceThreshold={diceRollData.dice_threshold}
+                    diceRoll={diceRollData.dice_roll}
+                />
             )}
         </Box>
     );
