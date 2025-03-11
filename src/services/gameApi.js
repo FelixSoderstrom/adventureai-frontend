@@ -9,19 +9,16 @@ const handleResponse = async (response) => {
 };
 
 const gameApi = {
-    rollDice: async (scenes) => {
+    rollDice: async (story, action) => {
         try {
-            // Get the last scene since that's what we want to send
-            const currentScene = scenes[scenes.length - 1];
-            
             const response = await fetch(`${API_BASE_URL}/roll_dice`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    story: currentScene.story,
-                    action: currentScene.action
+                    story,
+                    action
                 }),
             });
             return await handleResponse(response);

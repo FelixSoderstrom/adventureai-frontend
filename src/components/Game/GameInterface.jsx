@@ -23,8 +23,13 @@ const GameInterface = () => {
             
             setIsLoading(true);
             try {
-                // First, get the dice roll
-                const diceResponse = await gameApi.rollDice(game_session.scenes);
+                // Extract the last scene's story and action
+                const lastScene = game_session.scenes[game_session.scenes.length - 1];
+                const story = lastScene.story;
+                const action = lastScene.action;
+
+                // Make the roll_dice API call with explicit story and action
+                const diceResponse = await gameApi.rollDice(story, action);
                 
                 // Save the dice roll data and show the roller
                 setDiceRollData(diceResponse);
@@ -33,8 +38,14 @@ const GameInterface = () => {
                 // Update the dice roll result in the store
                 updateDiceRoll(diceResponse.dice_success);
 
-                // Now get the new scene
-                const sceneResponse = await gameApi.generateNewScene(game_session);
+                // Wait for state to update
+                await new Promise(resolve => setTimeout(resolve, 0));
+                
+                // Get fresh state
+                const updatedGameSession = useGameStore.getState().game_session;
+
+                // Now get the new scene with updated state
+                const sceneResponse = await gameApi.generateNewScene(updatedGameSession);
                 
                 // Update the image
                 setCurrentImage(sceneResponse.image);
@@ -68,18 +79,28 @@ const GameInterface = () => {
             // 1. Add the action to the most recent scene
             addActionToLastScene(action);
 
-            // 2. Make the roll_dice API call
-            const diceResponse = await gameApi.rollDice(game_session.scenes);
+            // 2. Extract the last scene's story and the new action
+            const lastScene = game_session.scenes[game_session.scenes.length - 1];
+            const story = lastScene.story;
+
+            // 3. Make the roll_dice API call with explicit story and action
+            const diceResponse = await gameApi.rollDice(story, action);
             
-            // 3. Update store with dice roll result and show roller
+            // 4. Update store with dice roll result and show roller
             updateDiceRoll(diceResponse.dice_success);
             setDiceRollData(diceResponse);
             setShowDiceRoller(true);
 
-            // 4. Generate new scene
-            const sceneResponse = await gameApi.generateNewScene(game_session);
+            // 5. Wait for state to update
+            await new Promise(resolve => setTimeout(resolve, 0));
             
-            // 5. Update UI and store with new scene
+            // 6. Get fresh state after the update
+            const updatedGameSession = useGameStore.getState().game_session;
+
+            // 7. Generate new scene with updated state
+            const sceneResponse = await gameApi.generateNewScene(updatedGameSession);
+            
+            // 8. Update UI and store with new scene
             setCurrentImage(sceneResponse.image);
             addScene({
                 story: sceneResponse.story,
