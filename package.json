@@ -8,6 +8,7 @@
     "@emotion/styled": "^11.11.0",
     "@react-three/drei": "^10.0.4",
     "@react-three/fiber": "^9.1.0",
+    "@splidejs/react-splide": "^0.7.12",
     "@testing-library/react": "^13.4.0",
     "framer-motion": "^10.17.9",
     "prop-types": "^15.8.1",
