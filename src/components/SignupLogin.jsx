@@ -82,22 +82,6 @@ const SignupLogin = () => {
               <TabPanel>
                 <VStack spacing={6}>
                   <FormControl>
-                    <FormLabel color="gray.300">Username</FormLabel>
-                    <Input
-                      type="text"
-                      bg="rgba(255,255,255,0.05)"
-                      border="1px solid rgba(183,69,250,0.2)"
-                      color="white"
-                      _hover={{
-                        border: "1px solid rgba(183,69,250,0.4)",
-                      }}
-                      _focus={{
-                        border: "1px solid #B745FA",
-                        boxShadow: "0 0 0 1px #B745FA",
-                      }}
-                    />
-                  </FormControl>
-                  <FormControl>
                     <FormLabel color="gray.300">Email</FormLabel>
                     <Input
                       type="email"
