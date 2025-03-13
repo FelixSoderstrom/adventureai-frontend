@@ -30,6 +30,14 @@ const gameApi = {
 
     generateNewScene: async (game_session) => {
         try {
+            // Log the exact data being sent to help with debugging
+            console.log("Sending to backend:", {
+                protagonist_name: game_session.protagonist_name,
+                inventory: game_session.inventory,
+                current_story: game_session.current_story,
+                scenes: game_session.scenes
+            });
+            
             const response = await fetch(`${API_BASE_URL}/generate_new_scene`, {
                 method: 'POST',
                 headers: {
@@ -67,7 +75,23 @@ const gameApi = {
             console.error('Fetch story error:', error);
             throw error;
         }
-    }
+    },
+
+    startGame: async (gameData) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/start-game`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(gameData)
+            });
+            return await handleResponse(response);
+        } catch (error) {
+            console.error('Start game error:', error);
+            throw error;
+        }
+    },
 };
 
 export { gameApi };

@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import { Box, Image, Spinner, Center } from '@chakra-ui/react';
 
 const ImageDisplay = ({ imageUrl, isLoading = false }) => {
+    // Add console log to debug the image URL
+    console.log("Image URL received:", imageUrl);
+    
     return (
         <Box
             bg="gray.800"
@@ -15,14 +18,18 @@ const ImageDisplay = ({ imageUrl, isLoading = false }) => {
                 <Center h="100%">
                     <Spinner size="xl" color="white" />
                 </Center>
-            ) : (
+            ) : imageUrl ? (
                 <Image
-                    src={imageUrl ? `data:image/jpeg;base64,${imageUrl}` : ''}
+                    src={`data:image/jpeg;base64,${imageUrl}`}
                     alt="Game Scene"
                     objectFit="contain"
                     w="100%"
                     h="100%"
                 />
+            ) : (
+                <Center h="100%">
+                    <Text color="gray.400">No image available</Text>
+                </Center>
             )}
         </Box>
     );

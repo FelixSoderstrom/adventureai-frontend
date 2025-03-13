@@ -41,6 +41,12 @@ The application expects a backend server running at the URL specified in .env wi
 - POST /player-action : Process player actions and return new game state
 - POST /roll-dice/{requiredRoll} : Handle dice roll events (future implementation)
 
+## CREDITS
+
+Dice animation used on page:
+
+"D20 Dice (W20 Würfel) 3D model [FREE]" (https://skfb.ly/onUnH) by VertexDon is licensed under Creative Commons Attribution-ShareAlike (http://creativecommons.org/licenses/by-sa/4.0/).
+
 ## Installation
 
 1. Clone the repository
